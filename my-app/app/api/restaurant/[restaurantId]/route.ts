@@ -2,15 +2,18 @@ import { NextResponse } from "next/server";
 import { demoMenuItems } from "../../../../lib/demo-menu-items";
 
 type Params = {
-  params: {
-    restaurantId?: string;
-  };
+  params:
+    | {
+        restaurantId: string;
+      }
+    | Promise<{
+        restaurantId: string;
+      }>;
 };
 
 export const GET = async (request: Request, { params }: Params) => {
-  const url = new URL(request.url);
-  const restaurantId =
-    params?.restaurantId || url.pathname.split("/").filter(Boolean).pop();
+  const resolvedParams = await params;
+  const restaurantId = resolvedParams.restaurantId;
 
   const id = Number(restaurantId);
   if (!restaurantId || Number.isNaN(id) || id <= 0) {
