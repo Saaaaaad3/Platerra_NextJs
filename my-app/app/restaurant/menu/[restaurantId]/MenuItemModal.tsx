@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
+
+const SWIPE_THRESHOLD = 40;
 
 type MenuItemModalProps = {
   item: MenuItem | null;
@@ -11,6 +13,7 @@ type MenuItemModalProps = {
 
 export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
   const [activeImage, setActiveImage] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (!item) return;
@@ -32,6 +35,12 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
   if (!item) return null;
 
   const images = item.itemImages?.length ? item.itemImages : ["/img/DummyDishImage.jpg"];
+
+  const goToImage = (index: number) => {
+    setActiveImage(((index % images.length) + images.length) % images.length);
+  };
+  const showPrevImage = () => goToImage(activeImage - 1);
+  const showNextImage = () => goToImage(activeImage + 1);
 
   return (
     <div
@@ -56,7 +65,23 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
           </svg>
         </button>
 
-        <div className="relative h-64 w-full flex-shrink-0 bg-slate-100 sm:h-80">
+        <div
+          className="relative h-64 w-full flex-shrink-0 touch-pan-y bg-slate-100 sm:h-80"
+          onTouchStart={(event) => {
+            touchStartX.current = event.touches[0].clientX;
+          }}
+          onTouchEnd={(event) => {
+            if (touchStartX.current === null) return;
+            const deltaX = event.changedTouches[0].clientX - touchStartX.current;
+            touchStartX.current = null;
+
+            if (deltaX > SWIPE_THRESHOLD) {
+              showPrevImage();
+            } else if (deltaX < -SWIPE_THRESHOLD) {
+              showNextImage();
+            }
+          }}
+        >
           <Image
             src={images[activeImage]}
             alt={`${item.itemName} photo ${activeImage + 1}`}
@@ -67,19 +92,50 @@ export default function MenuItemModal({ item, onClose }: MenuItemModalProps) {
           />
 
           {images.length > 1 && (
-            <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-1.5">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  aria-label={`Show photo ${index + 1} of ${item.itemName}`}
-                  onClick={() => setActiveImage(index)}
-                  className={`h-2 w-2 rounded-full transition ${
-                    index === activeImage ? "bg-white" : "bg-white/50"
-                  }`}
-                />
-              ))}
-            </div>
+            <>
+              <button
+                type="button"
+                onClick={showPrevImage}
+                aria-label="Previous photo"
+                className="absolute left-3 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md transition hover:bg-white sm:flex"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
+                  <path
+                    fillRule="evenodd"
+                    d="M12.79 5.23a.75.75 0 0 1 0 1.06L9.06 10l3.73 3.71a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={showNextImage}
+                aria-label="Next photo"
+                className="absolute right-3 top-1/2 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-md transition hover:bg-white sm:flex"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
+                  <path
+                    fillRule="evenodd"
+                    d="M7.21 14.77a.75.75 0 0 1 0-1.06L10.94 10 7.21 6.29a.75.75 0 1 1 1.06-1.06l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0Z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+
+              <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-1.5">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Show photo ${index + 1} of ${item.itemName}`}
+                    onClick={() => goToImage(index)}
+                    className={`h-2 w-2 rounded-full transition ${
+                      index === activeImage ? "bg-white" : "bg-white/50"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 
