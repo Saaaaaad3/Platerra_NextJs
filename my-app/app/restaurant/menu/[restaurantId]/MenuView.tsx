@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 import MenuItemModal from "./MenuItemModal";
+import CategoryNav from "./CategoryNav";
 
 type MenuViewProps = {
   menuByCategory: Record<string, MenuItem[]>;
@@ -18,8 +19,9 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
         {Object.entries(menuByCategory).map(([category, items]) => (
           <details
             key={category}
+            id={`category-${category}`}
             open
-            className="overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200"
+            className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200"
           >
             <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-200 px-6 py-5 text-left text-xl font-semibold text-slate-900 transition-colors hover:text-slate-700">
               <span className="capitalize">{category.replace(/-/g, " ")}</span>
@@ -97,6 +99,7 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
       </section>
 
       <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+      <CategoryNav menuByCategory={menuByCategory} />
     </>
   );
 }
