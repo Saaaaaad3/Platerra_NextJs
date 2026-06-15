@@ -68,67 +68,76 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
                 {items.length}
               </span>
             </summary>
-            <div className="space-y-3 px-3 py-3 sm:space-y-4 sm:px-6 sm:py-6">
+            <div className="divide-y divide-slate-100 px-3 py-1 sm:px-6 sm:py-2">
               {items.map((item) => (
                 <button
                   key={item.itemId}
                   type="button"
                   onClick={() => setSelectedItem(item)}
-                  className="w-full overflow-hidden rounded-[1.75rem] bg-slate-50 p-3 text-left transition active:scale-[0.99] active:bg-slate-100 sm:p-6"
+                  className="flex w-full items-center gap-4 rounded-2xl py-4 text-left transition active:bg-slate-50 sm:gap-5"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
-                    <div className="relative h-28 w-full overflow-hidden rounded-[1.75rem] bg-slate-100 sm:h-32 sm:w-40 sm:flex-shrink-0">
-                      <Image
-                        src={item.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
-                        alt={`${item.itemName} thumbnail`}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                        <div>
-                          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 sm:text-2xl">
-                            {item.itemName}
-                            {item.itemBestSeller && (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="h-5 w-5 flex-shrink-0 text-amber-400"
-                                aria-label="Bestseller"
-                                role="img"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L10 18.354l-4.626 2.81c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006Z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                            )}
-                          </h2>
-                          <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600 sm:mt-2">
-                            {item.itemDescription}
-                          </p>
-                        </div>
-                        <div className="inline-flex self-start rounded-full bg-slate-900 px-4 py-2 text-md font-semibold text-white">
-                          ${item.itemPrice}
-                        </div>
-                      </div>
-                    </div>
+                  <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100 sm:h-36 sm:w-36">
+                    <Image
+                      src={item.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
+                      alt={`${item.itemName} thumbnail`}
+                      fill
+                      className="object-cover"
+                      sizes="(min-width: 640px) 9rem, 8rem"
+                    />
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 sm:mt-5">
-                    {item.itemIsVeg && (
-                      <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
-                        Veg
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                    <h2 className="text-lg font-semibold leading-snug text-slate-900 sm:text-2xl">
+                      <span
+                        className={`mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border align-middle ${
+                          item.itemIsVeg ? "border-emerald-600" : "border-rose-700"
+                        }`}
+                        aria-label={item.itemIsVeg ? "Vegetarian" : "Non-vegetarian"}
+                      >
+                        {item.itemIsVeg ? (
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
+                        ) : (
+                          <span className="h-0 w-0 border-x-[3px] border-b-[5px] border-x-transparent border-b-rose-700" />
+                        )}
                       </span>
-                    )}
-                    {item.itemSpicy && (
-                      <span className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-rose-700">
-                        Spicy
+                      {item.itemName}
+                      {item.itemBestSeller && (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          className="ml-1.5 inline h-4 w-4 align-middle text-amber-400 sm:h-5 sm:w-5"
+                          aria-label="Bestseller"
+                          role="img"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L10 18.354l-4.626 2.81c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006Z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </h2>
+                    <span className="hidden flex-shrink-0 rounded-full bg-slate-900 px-4 py-1.5 text-base font-semibold text-white sm:inline-flex">
+                      ${item.itemPrice}
+                    </span>
+                    </div>
+                    <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-slate-600 sm:mt-2 sm:leading-6">
+                      {item.itemDescription}
+                    </p>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {item.itemSpicy && (
+                          <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs text-rose-700">
+                            Spicy
+                          </span>
+                        )}
+                      </div>
+                      <span className="flex-shrink-0 rounded-full bg-slate-900 px-3 py-1 text-sm font-semibold text-white sm:hidden">
+                        ${item.itemPrice}
                       </span>
-                    )}
+                    </div>
                   </div>
                 </button>
               ))}
