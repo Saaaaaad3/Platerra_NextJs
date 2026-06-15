@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 import MenuItemModal from "./MenuItemModal";
 import CategoryNav from "./CategoryNav";
+import MenuFilters from "./MenuFilters";
+import { itemMatchesFilter, itemMatchesSearch, type FilterKey } from "./menuFilterUtils";
 
 type MenuViewProps = {
   menuByCategory: Record<string, MenuItem[]>;
@@ -12,33 +14,70 @@ type MenuViewProps = {
 
 export default function MenuView({ menuByCategory }: MenuViewProps) {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [activeFilters, setActiveFilters] = useState<FilterKey[]>([]);
+
+  const toggleFilter = (filter: FilterKey) => {
+    setActiveFilters((current) =>
+      current.includes(filter) ? current.filter((f) => f !== filter) : [...current, filter]
+    );
+  };
+
+  const filteredMenuByCategory = useMemo(() => {
+    const result: Record<string, MenuItem[]> = {};
+    for (const [category, items] of Object.entries(menuByCategory)) {
+      const matches = items.filter(
+        (item) =>
+          itemMatchesSearch(item, searchText) &&
+          activeFilters.every((filter) => itemMatchesFilter(item, filter))
+      );
+      if (matches.length > 0) result[category] = matches;
+    }
+    return result;
+  }, [menuByCategory, searchText, activeFilters]);
+
+  const hasResults = Object.keys(filteredMenuByCategory).length > 0;
 
   return (
     <>
-      <section className="space-y-4">
-        {Object.entries(menuByCategory).map(([category, items]) => (
+      <MenuFilters
+        searchText={searchText}
+        onSearchChange={setSearchText}
+        activeFilters={activeFilters}
+        onToggleFilter={toggleFilter}
+      />
+
+      {!hasResults && (
+        <div className="mt-4 rounded-[2rem] bg-white px-6 py-12 text-center text-slate-500 shadow-sm shadow-slate-200">
+          No dishes match your search or filters.
+        </div>
+      )}
+
+      {hasResults && (
+      <section className="mt-4 space-y-4">
+        {Object.entries(filteredMenuByCategory).map(([category, items]) => (
           <details
             key={category}
             id={`category-${category}`}
             open
             className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200"
           >
-            <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-200 px-6 py-5 text-left text-xl font-semibold text-slate-900 transition-colors hover:text-slate-700">
+            <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 text-left text-lg font-semibold text-slate-900 transition-colors hover:text-slate-700 sm:px-6 sm:py-5 sm:text-xl">
               <span className="capitalize">{category.replace(/-/g, " ")}</span>
               <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
                 {items.length}
               </span>
             </summary>
-            <div className="space-y-4 px-6 py-6">
+            <div className="space-y-3 px-3 py-3 sm:space-y-4 sm:px-6 sm:py-6">
               {items.map((item) => (
                 <button
                   key={item.itemId}
                   type="button"
                   onClick={() => setSelectedItem(item)}
-                  className="w-full overflow-hidden rounded-[1.75rem] bg-slate-50 p-6 text-left transition active:scale-[0.99] active:bg-slate-100"
+                  className="w-full overflow-hidden rounded-[1.75rem] bg-slate-50 p-3 text-left transition active:scale-[0.99] active:bg-slate-100 sm:p-6"
                 >
-                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-                    <div className="relative h-32 w-full overflow-hidden rounded-[1.75rem] bg-slate-100 sm:h-32 sm:w-40 sm:flex-shrink-0">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-6">
+                    <div className="relative h-28 w-full overflow-hidden rounded-[1.75rem] bg-slate-100 sm:h-32 sm:w-40 sm:flex-shrink-0">
                       <Image
                         src={item.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
                         alt={`${item.itemName} thumbnail`}
@@ -48,9 +87,9 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
                     </div>
 
                     <div className="flex-1">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                         <div>
-                          <h2 className="flex items-center gap-2 text-2xl font-semibold text-slate-900">
+                          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 sm:text-2xl">
                             {item.itemName}
                             {item.itemBestSeller && (
                               <svg
@@ -69,7 +108,7 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
                               </svg>
                             )}
                           </h2>
-                          <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
+                          <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600 sm:mt-2">
                             {item.itemDescription}
                           </p>
                         </div>
@@ -79,7 +118,7 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-5 flex flex-wrap gap-2 text-xs text-slate-500">
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-500 sm:mt-5">
                     {item.itemIsVeg && (
                       <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
                         Veg
@@ -97,9 +136,10 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
           </details>
         ))}
       </section>
+      )}
 
       <MenuItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
-      <CategoryNav menuByCategory={menuByCategory} />
+      <CategoryNav menuByCategory={filteredMenuByCategory} />
     </>
   );
 }

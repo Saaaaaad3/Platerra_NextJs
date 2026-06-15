@@ -15,6 +15,7 @@ export type MenuItem = {
   category: string;
   ingredients: string[];
   itemIngredients: string;
+  dietaryTags: string[];
 };
 
 export const demoMenuItems: MenuItem[] = [
@@ -36,6 +37,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "main-course",
     ingredients: ["Chicken", "Tomato", "Cream", "Butter", "Spices"],
     itemIngredients: "Chicken, Tomato, Cream, Butter, Spices",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
   {
     itemId: 102,
@@ -55,6 +57,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "starters",
     ingredients: ["Paneer", "Yogurt", "Spices", "Bell Peppers", "Onion"],
     itemIngredients: "Paneer, Yogurt, Spices, Bell Peppers, Onion",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
   {
     itemId: 103,
@@ -74,6 +77,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "main-course",
     ingredients: ["Basmati Rice", "Mixed Vegetables", "Spices", "Saffron"],
     itemIngredients: "Basmati Rice, Mixed Vegetables, Spices, Saffron",
+    dietaryTags: ["vegan", "gluten-free", "dairy-free", "nut-free"],
   },
   {
     itemId: 104,
@@ -93,6 +97,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "desserts",
     ingredients: ["Milk Solids", "Sugar", "Rose Water", "Cardamom"],
     itemIngredients: "Milk Solids, Sugar, Rose Water, Cardamom",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
   {
     itemId: 105,
@@ -112,6 +117,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "beverages",
     ingredients: ["Tea", "Milk", "Ginger", "Cardamom", "Cinnamon"],
     itemIngredients: "Tea, Milk, Ginger, Cardamom, Cinnamon",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
   {
     itemId: 201,
@@ -138,6 +144,7 @@ export const demoMenuItems: MenuItem[] = [
     ],
     itemIngredients:
       "Sourdough Bread, Avocado, Cherry Tomatoes, Microgreens, Olive Oil",
+    dietaryTags: ["vegan", "dairy-free", "nut-free"],
   },
   {
     itemId: 202,
@@ -156,6 +163,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "coffee",
     ingredients: ["Espresso", "Steamed Milk", "Milk Foam"],
     itemIngredients: "Espresso, Steamed Milk, Milk Foam",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
   {
     itemId: 203,
@@ -174,6 +182,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "pastries",
     ingredients: ["Butter", "Flour", "Chocolate", "Yeast", "Sugar"],
     itemIngredients: "Butter, Flour, Chocolate, Yeast, Sugar",
+    dietaryTags: ["nut-free"],
   },
   {
     itemId: 204,
@@ -193,6 +202,7 @@ export const demoMenuItems: MenuItem[] = [
     category: "lunch",
     ingredients: ["Quinoa", "Mixed Vegetables", "Avocado", "Tahini", "Lemon"],
     itemIngredients: "Quinoa, Mixed Vegetables, Avocado, Tahini, Lemon",
+    dietaryTags: ["vegan", "gluten-free", "dairy-free", "nut-free"],
   },
   {
     itemId: 205,
@@ -212,5 +222,6 @@ export const demoMenuItems: MenuItem[] = [
     category: "coffee",
     ingredients: ["Matcha Powder", "Steamed Milk", "Honey"],
     itemIngredients: "Matcha Powder, Steamed Milk, Honey",
+    dietaryTags: ["gluten-free", "nut-free"],
   },
 ];
