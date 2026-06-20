@@ -9,6 +9,8 @@ export type MenuItem = {
   itemSpiceLevel: number;
   itemAvailable: boolean;
   itemBestSeller: boolean;
+  itemIsNew?: boolean;
+  itemPopularThisWeek?: boolean;
   itemIsVeg: boolean;
   itemIsJain: boolean;
   itemImages: string[];
@@ -16,6 +18,7 @@ export type MenuItem = {
   ingredients: string[];
   itemIngredients: string;
   dietaryTags: string[];
+  allergens?: string[];
 };
 
 export const demoMenuItems: MenuItem[] = [
@@ -31,6 +34,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 3,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: false,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg", "/img/DummyDishImage.jpg", "/img/DummyDishImage.jpg"],
@@ -38,6 +42,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Chicken", "Tomato", "Cream", "Butter", "Spices"],
     itemIngredients: "Chicken, Tomato, Cream, Butter, Spices",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
   {
     itemId: 102,
@@ -51,6 +56,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 3,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg", "/img/DummyDishImage.jpg"],
@@ -58,6 +64,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Paneer", "Yogurt", "Spices", "Bell Peppers", "Onion"],
     itemIngredients: "Paneer, Yogurt, Spices, Bell Peppers, Onion",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
   {
     itemId: 103,
@@ -71,6 +78,8 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 3,
     itemAvailable: true,
     itemBestSeller: false,
+    itemIsNew: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg", "/img/DummyDishImage.jpg"],
@@ -81,6 +90,7 @@ export const demoMenuItems: MenuItem[] = [
   },
   {
     itemId: 104,
+    // no allergens field = nothing to show
     itemName: "Gulab Jamun",
     restId: 1,
     itemPrice: "6.99",
@@ -98,6 +108,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Milk Solids", "Sugar", "Rose Water", "Cardamom"],
     itemIngredients: "Milk Solids, Sugar, Rose Water, Cardamom",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
   {
     itemId: 105,
@@ -111,6 +122,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 2,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -118,6 +130,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Tea", "Milk", "Ginger", "Cardamom", "Cinnamon"],
     itemIngredients: "Tea, Milk, Ginger, Cardamom, Cinnamon",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
   {
     itemId: 201,
@@ -131,6 +144,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 0,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -145,6 +159,7 @@ export const demoMenuItems: MenuItem[] = [
     itemIngredients:
       "Sourdough Bread, Avocado, Cherry Tomatoes, Microgreens, Olive Oil",
     dietaryTags: ["vegan", "dairy-free", "nut-free"],
+    allergens: ["gluten"],
   },
   {
     itemId: 202,
@@ -157,6 +172,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 0,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: true,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -164,6 +180,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Espresso", "Steamed Milk", "Milk Foam"],
     itemIngredients: "Espresso, Steamed Milk, Milk Foam",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
   {
     itemId: 203,
@@ -176,6 +193,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 0,
     itemAvailable: true,
     itemBestSeller: true,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -183,6 +201,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Butter", "Flour", "Chocolate", "Yeast", "Sugar"],
     itemIngredients: "Butter, Flour, Chocolate, Yeast, Sugar",
     dietaryTags: ["nut-free"],
+    allergens: ["dairy", "gluten"],
   },
   {
     itemId: 204,
@@ -196,6 +215,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 1,
     itemAvailable: true,
     itemBestSeller: false,
+    itemIsNew: true,
     itemIsVeg: true,
     itemIsJain: false,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -203,6 +223,7 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Quinoa", "Mixed Vegetables", "Avocado", "Tahini", "Lemon"],
     itemIngredients: "Quinoa, Mixed Vegetables, Avocado, Tahini, Lemon",
     dietaryTags: ["vegan", "gluten-free", "dairy-free", "nut-free"],
+    allergens: ["sesame"],
   },
   {
     itemId: 205,
@@ -216,6 +237,7 @@ export const demoMenuItems: MenuItem[] = [
     itemSpiceLevel: 0,
     itemAvailable: true,
     itemBestSeller: false,
+    itemPopularThisWeek: true,
     itemIsVeg: true,
     itemIsJain: true,
     itemImages: ["/img/DummyDishImage.jpg"],
@@ -223,5 +245,6 @@ export const demoMenuItems: MenuItem[] = [
     ingredients: ["Matcha Powder", "Steamed Milk", "Honey"],
     itemIngredients: "Matcha Powder, Steamed Milk, Honey",
     dietaryTags: ["gluten-free", "nut-free"],
+    allergens: ["dairy"],
   },
 ];

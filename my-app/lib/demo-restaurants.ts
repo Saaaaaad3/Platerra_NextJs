@@ -1,8 +1,18 @@
+export type SocialPlatform = "instagram" | "facebook" | "twitter" | "tiktok" | "youtube" | "website";
+
+export type SocialHandle = {
+  platform: SocialPlatform;
+  handle: string;
+};
+
 export type RestaurantInfo = {
   id: number;
   name: string;
   description: string;
   location: string;
+  logo?: string;
+  socialHandles?: SocialHandle[];
+  headerTagline?: string;
 };
 
 export const demoRestaurants: RestaurantInfo[] = [
@@ -11,12 +21,21 @@ export const demoRestaurants: RestaurantInfo[] = [
     name: "Spice House",
     description: "Classic Indian favorites with rich flavor and beautiful plating.",
     location: "Downtown",
+    logo: "/img/SpiceHouseLogo.png",
+    socialHandles: [
+      { platform: "instagram", handle: "spicehouseofficial" },
+      { platform: "facebook", handle: "SpiceHouseRestaurant" },
+    ],
   },
   {
     id: 2,
     name: "Green Bean Café",
     description: "Fresh cafés and healthy breakfasts made for every day.",
     location: "Uptown",
+    socialHandles: [
+      { platform: "instagram", handle: "greenbeancafe" },
+      { platform: "website", handle: "greenbeancafe.com" },
+    ],
   },
 ];
 
