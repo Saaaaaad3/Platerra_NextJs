@@ -6,7 +6,7 @@ export type SocialHandle = {
 };
 
 export type RestaurantInfo = {
-  id: number;
+  id: number | string;
   name: string;
   description: string;
   location: string;

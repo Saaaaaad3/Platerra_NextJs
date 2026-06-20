@@ -1,13 +1,13 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { demoMenuItems } from "../../../../lib/demo-menu-items";
+import { createClient } from "../../../../lib/supabase/server";
+import type { MenuItem } from "../../../../lib/demo-menu-items";
+import type { RestaurantInfo, SocialPlatform } from "../../../../lib/demo-restaurants";
 import MenuView from "./MenuView";
-import { getRestaurantById, type SocialPlatform } from "../../../../lib/demo-restaurants";
 
 type PageProps = {
-  params: Promise<{
-    restaurantId: string;
-  }>;
+  params: Promise<{ restaurantId: string }>;
 };
 
 const SOCIAL_CONFIG: Record<
@@ -53,27 +53,88 @@ const SOCIAL_CONFIG: Record<
 };
 
 export default async function RestaurantMenuPage({ params }: PageProps) {
-  const { restaurantId } = await params;
-  const restaurant = getRestaurantById(Number(restaurantId));
-  const restaurantName = restaurant?.name || `Restaurant ${restaurantId}`;
-  const menuItems = demoMenuItems.filter((item) => item.restId === Number(restaurantId));
+  const { restaurantId: slug } = await params;
+  const supabase = await createClient();
 
-  const menuByCategory = menuItems.reduce<Record<string, typeof menuItems>>((acc, item) => {
-    if (!acc[item.category]) {
-      acc[item.category] = [];
-    }
-    acc[item.category].push(item);
-    return acc;
-  }, {});
+  // Fetch restaurant + social handles
+  const { data: restaurant, error: restaurantError } = await supabase
+    .from("restaurants")
+    .select("*, social_handles(platform, handle)")
+    .eq("slug", slug)
+    .single();
+
+  if (restaurantError || !restaurant) notFound();
+
+  // Fetch categories and items in parallel
+  const [{ data: categories }, { data: dbItems }] = await Promise.all([
+    supabase
+      .from("categories")
+      .select("id, name, display_order")
+      .eq("restaurant_id", restaurant.id)
+      .order("display_order"),
+    supabase
+      .from("menu_items")
+      .select("*, item_images(url, display_order)")
+      .eq("restaurant_id", restaurant.id)
+      .eq("is_available", true)
+      .order("display_order"),
+  ]);
+
+  // Build menuByCategory in category display_order
+  const categoryMap = new Map((categories ?? []).map((c) => [c.id, c.name]));
+  const menuByCategory: Record<string, MenuItem[]> = {};
+  for (const cat of categories ?? []) menuByCategory[cat.name] = [];
+
+  for (const row of dbItems ?? []) {
+    const catName = categoryMap.get(row.category_id) ?? "other";
+    const images = ((row.item_images ?? []) as { url: string; display_order: number }[])
+      .sort((a, b) => a.display_order - b.display_order)
+      .map((img) => img.url);
+
+    const item: MenuItem = {
+      itemId: row.id,
+      itemName: row.name,
+      itemPrice: String(row.price),
+      itemDescription: row.description ?? "",
+      itemSweet: row.is_sweet,
+      itemSpicy: row.is_spicy,
+      itemSpiceLevel: row.spice_level,
+      itemAvailable: row.is_available,
+      itemBestSeller: row.is_bestseller,
+      itemIsNew: row.is_new,
+      itemPopularThisWeek: row.is_popular_this_week,
+      itemIsVeg: row.is_veg,
+      itemIsJain: row.is_jain,
+      itemImages: images,
+      category: catName,
+      dietaryTags: row.dietary_tags ?? [],
+      allergens: row.allergens ?? [],
+    };
+
+    if (!menuByCategory[catName]) menuByCategory[catName] = [];
+    menuByCategory[catName].push(item);
+  }
+
+  const restaurantInfo: RestaurantInfo = {
+    id: restaurant.id,
+    name: restaurant.name,
+    description: restaurant.description ?? "",
+    location: restaurant.location ?? "",
+    logo: restaurant.logo_url ?? undefined,
+    socialHandles: restaurant.social_handles ?? [],
+    headerTagline: restaurant.header_tagline ?? undefined,
+  };
+
+  const restaurantName = restaurantInfo.name;
 
   return (
     <main className="min-h-screen bg-zinc-50 px-3 py-4 text-slate-900 sm:px-4 sm:py-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-8">
         <header className="rounded-[2rem] bg-white/95 p-4 text-center shadow-sm shadow-slate-200 backdrop-blur-xl sm:p-8">
-          {restaurant?.logo ? (
-            <Link href={`/restaurant/${restaurantId}`} className="inline-block transition-opacity hover:opacity-75">
+          {restaurantInfo.logo ? (
+            <Link href={`/restaurant/${slug}`} className="inline-block transition-opacity hover:opacity-75">
               <Image
-                src={restaurant.logo}
+                src={restaurantInfo.logo}
                 alt={restaurantName}
                 width={240}
                 height={80}
@@ -83,16 +144,17 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
             </Link>
           ) : (
             <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:mt-4 sm:text-5xl">
-              <Link href={`/restaurant/${restaurantId}`} className="transition-colors hover:text-slate-600">
+              <Link href={`/restaurant/${slug}`} className="transition-colors hover:text-slate-600">
                 {restaurantName}
               </Link>
             </h1>
           )}
 
-          {restaurant?.socialHandles && restaurant.socialHandles.length > 0 ? (
+          {restaurantInfo.socialHandles && restaurantInfo.socialHandles.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:mt-4">
-              {restaurant.socialHandles.map(({ platform, handle }) => {
-                const cfg = SOCIAL_CONFIG[platform];
+              {restaurantInfo.socialHandles.map(({ platform, handle }) => {
+                const cfg = SOCIAL_CONFIG[platform as SocialPlatform];
+                if (!cfg) return null;
                 return (
                   <a
                     key={platform}
@@ -110,18 +172,18 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
                 );
               })}
             </div>
-          ) : restaurant?.headerTagline ? (
+          ) : restaurantInfo.headerTagline ? (
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-lg sm:leading-7">
-              {restaurant.headerTagline}
+              {restaurantInfo.headerTagline}
             </p>
           ) : null}
         </header>
 
-        {menuItems.length ? (
+        {Object.keys(menuByCategory).length > 0 ? (
           <MenuView menuByCategory={menuByCategory} />
         ) : (
           <div className="rounded-[2rem] bg-white p-10 text-center shadow-sm shadow-slate-200">
-            <p className="text-lg font-medium text-slate-700">No menu items found for this restaurant.</p>
+            <p className="text-lg font-medium text-slate-700">No menu items found.</p>
           </div>
         )}
       </div>

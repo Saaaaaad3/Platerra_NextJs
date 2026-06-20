@@ -1,7 +1,7 @@
 export type MenuItem = {
-  itemId: number;
+  itemId: string;
   itemName: string;
-  restId: number;
+  restId?: number;
   itemPrice: string;
   itemDescription: string;
   itemSweet: boolean;
@@ -15,15 +15,15 @@ export type MenuItem = {
   itemIsJain: boolean;
   itemImages: string[];
   category: string;
-  ingredients: string[];
-  itemIngredients: string;
+  ingredients?: string[];
+  itemIngredients?: string;
   dietaryTags: string[];
   allergens?: string[];
 };
 
 export const demoMenuItems: MenuItem[] = [
   {
-    itemId: 101,
+    itemId: "101",
     itemName: "Butter Chicken",
     restId: 1,
     itemPrice: "16.99",
@@ -45,7 +45,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy"],
   },
   {
-    itemId: 102,
+    itemId: "102",
     itemName: "Paneer Tikka",
     restId: 1,
     itemPrice: "12.99",
@@ -67,7 +67,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy"],
   },
   {
-    itemId: 103,
+    itemId: "103",
     itemName: "Veg Biryani",
     restId: 1,
     itemPrice: "14.99",
@@ -89,7 +89,7 @@ export const demoMenuItems: MenuItem[] = [
     dietaryTags: ["vegan", "gluten-free", "dairy-free", "nut-free"],
   },
   {
-    itemId: 104,
+    itemId: "104",
     // no allergens field = nothing to show
     itemName: "Gulab Jamun",
     restId: 1,
@@ -111,7 +111,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy"],
   },
   {
-    itemId: 105,
+    itemId: "105",
     itemName: "Masala Chai",
     restId: 1,
     itemPrice: "3.99",
@@ -133,7 +133,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy"],
   },
   {
-    itemId: 201,
+    itemId: "201",
     itemName: "Avocado Toast",
     restId: 2,
     itemPrice: "8.99",
@@ -162,7 +162,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["gluten"],
   },
   {
-    itemId: 202,
+    itemId: "202",
     itemName: "Cappuccino",
     restId: 2,
     itemPrice: "4.50",
@@ -183,7 +183,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy"],
   },
   {
-    itemId: 203,
+    itemId: "203",
     itemName: "Chocolate Croissant",
     restId: 2,
     itemPrice: "5.99",
@@ -204,7 +204,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["dairy", "gluten"],
   },
   {
-    itemId: 204,
+    itemId: "204",
     itemName: "Quinoa Bowl",
     restId: 2,
     itemPrice: "12.99",
@@ -226,7 +226,7 @@ export const demoMenuItems: MenuItem[] = [
     allergens: ["sesame"],
   },
   {
-    itemId: 205,
+    itemId: "205",
     itemName: "Matcha Latte",
     restId: 2,
     itemPrice: "5.50",

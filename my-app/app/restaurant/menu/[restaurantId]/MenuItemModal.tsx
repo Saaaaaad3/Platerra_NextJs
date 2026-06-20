@@ -322,11 +322,11 @@ export default function MenuItemModal({ item, allItems, onClose, onSelectItem }:
             )}
 
             {/* Ingredients */}
-            {item.ingredients.length > 0 && (
+            {(item.ingredients ?? []).length > 0 && (
               <div>
                 <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">Ingredients</h3>
                 <div className="flex flex-wrap gap-2">
-                  {item.ingredients.map((ingredient) => (
+                  {(item.ingredients ?? []).map((ingredient) => (
                     <span key={ingredient} className="rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-600">
                       {ingredient}
                     </span>

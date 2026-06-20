@@ -53,6 +53,6 @@ export function itemMatchesSearch(item: MenuItem, query: string): boolean {
   return (
     item.itemName.toLowerCase().includes(normalized) ||
     item.itemDescription.toLowerCase().includes(normalized) ||
-    item.ingredients.some((ingredient) => ingredient.toLowerCase().includes(normalized))
+    (item.ingredients ?? []).some((ingredient) => ingredient.toLowerCase().includes(normalized))
   );
 }
