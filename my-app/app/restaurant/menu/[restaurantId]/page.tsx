@@ -4,6 +4,7 @@ import Image from "next/image";
 import { createClient } from "../../../../lib/supabase/server";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 import type { RestaurantInfo, SocialPlatform } from "../../../../lib/demo-restaurants";
+import { UNCATEGORISED_KEY } from "./menuFilterUtils";
 import MenuView from "./MenuView";
 
 type PageProps = {
@@ -86,7 +87,9 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
   for (const cat of categories ?? []) menuByCategory[cat.name] = [];
 
   for (const row of dbItems ?? []) {
-    const catName = categoryMap.get(row.category_id) ?? "other";
+    // Items with no category (or a dangling category_id) fall into the
+    // uncategorised bucket, rendered headerless at the bottom of the menu.
+    const catName = categoryMap.get(row.category_id) ?? UNCATEGORISED_KEY;
     const images = ((row.item_images ?? []) as { url: string; display_order: number }[])
       .sort((a, b) => a.display_order - b.display_order)
       .map((img) => img.url);

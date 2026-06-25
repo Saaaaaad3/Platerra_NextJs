@@ -13,6 +13,9 @@ function toSlug(name: string) {
   return name.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+// Sentinel for the virtual "Uncategorised" bucket (items with category_id === null).
+const UNCATEGORISED_ID = "__uncategorised__";
+
 type Props = {
   restaurantId: string;
   initialCategories: Category[];
@@ -37,8 +40,20 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedItems = items.filter((i) => i.category_id === selectedCatId);
+  const knownCatIds = new Set(categories.map((c) => c.id));
+  const isUncategorisedItem = (i: DbItem) => i.category_id === null || !knownCatIds.has(i.category_id);
+  const isUncategorisedView = selectedCatId === UNCATEGORISED_ID;
+
+  const selectedItems = items.filter((i) =>
+    isUncategorisedView ? isUncategorisedItem(i) : i.category_id === selectedCatId
+  );
   const selectedCat = categories.find((c) => c.id === selectedCatId);
+  const uncategorisedCount = items.filter(isUncategorisedItem).length;
+  const selectedTitle = isUncategorisedView
+    ? "Uncategorised"
+    : selectedCat
+      ? toDisplay(selectedCat.name)
+      : "";
 
   // ── Category CRUD ──────────────────────────────────────────────────────
 
@@ -69,11 +84,23 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
   const handleDeleteCategory = async (id: string) => {
     const count = items.filter((i) => i.category_id === id).length;
     const msg = count > 0
-      ? `This category has ${count} item(s). Delete anyway? Items will become uncategorised.`
+      ? `Delete this category? Its ${count} item(s) will move to Uncategorised.`
       : "Delete this category?";
     if (!confirm(msg)) return;
+
+    // Move items out first so the delete can't orphan them, regardless of the FK rule.
+    if (count > 0) {
+      const { error: moveError } = await supabase
+        .from("menu_items")
+        .update({ category_id: null })
+        .eq("category_id", id);
+      if (moveError) { setError(moveError.message); return; }
+    }
+
     const { error } = await supabase.from("categories").delete().eq("id", id);
     if (error) { setError(error.message); return; }
+
+    setItems((prev) => prev.map((i) => (i.category_id === id ? { ...i, category_id: null } : i)));
     setCategories((prev) => prev.filter((c) => c.id !== id));
     if (selectedCatId === id) {
       const next = categories.find((c) => c.id !== id)?.id ?? null;
@@ -106,9 +133,12 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
     setSaving(true);
     setError(null);
 
+    // Empty string from the form's "Uncategorised" option → null.
+    const categoryId = formData.category_id === "" ? null : formData.category_id;
+
     const payload = {
       restaurant_id: restaurantId,
-      category_id: formData.category_id || selectedCatId,
+      category_id: categoryId,
       name: formData.name,
       description: formData.description || null,
       price: formData.price,
@@ -132,9 +162,7 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
       if (error) { setError(error.message); setSaving(false); return; }
       savedItemId = editingItem.id;
     } else {
-      const display_order = items.filter(
-        (i) => i.category_id === (formData.category_id || selectedCatId)
-      ).length;
+      const display_order = items.filter((i) => i.category_id === categoryId).length;
       const { data, error } = await supabase
         .from("menu_items")
         .insert({ ...payload, display_order })
@@ -189,13 +217,11 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
         )
       );
     } else {
-      const display_order = items.filter(
-        (i) => i.category_id === (formData.category_id || selectedCatId)
-      ).length;
+      const display_order = items.filter((i) => i.category_id === categoryId).length;
       const newItem: DbItem = {
         ...payload,
         id: savedItemId,
-        category_id: formData.category_id || selectedCatId,
+        category_id: categoryId,
         display_order,
         dietary_tags: [],
         item_images: updatedImages,
@@ -282,6 +308,24 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
             </svg>
           </div>
         ))}
+
+        {/* Virtual bucket — only appears while uncategorised items exist. Not a real category, so no rename/delete. */}
+        {uncategorisedCount > 0 && (
+          <button
+            onClick={() => { setSelectedCatId(UNCATEGORISED_ID); setMobileView("items"); }}
+            className={`group flex w-full items-center gap-1 rounded-xl px-3 transition ${
+              isUncategorisedView ? "bg-slate-100" : "hover:bg-slate-50 active:bg-slate-50"
+            }`}
+          >
+            <span className="min-w-0 flex-1 py-4 text-left text-sm font-medium italic text-slate-500 lg:py-2.5">
+              Uncategorised
+              <span className="ml-1.5 text-xs font-normal not-italic text-slate-400">{uncategorisedCount}</span>
+            </span>
+            <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 shrink-0 text-slate-300 lg:hidden">
+              <path fillRule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+            </svg>
+          </button>
+        )}
       </div>
 
       <div className="border-t border-slate-100 p-2">
@@ -410,7 +454,7 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
         </button>
 
         <h1 className="flex-1 text-base font-semibold text-slate-900 lg:text-lg">
-          {mobileView === "items" && selectedCat ? toDisplay(selectedCat.name) : "Menu"}
+          {mobileView === "items" && selectedCatId ? selectedTitle : "Menu"}
         </h1>
 
         <button
@@ -451,7 +495,7 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
         open={showItemForm}
         editingItem={editingItem}
         categories={categories}
-        defaultCategoryId={selectedCatId ?? ""}
+        defaultCategoryId={isUncategorisedView || !selectedCatId ? "" : selectedCatId}
         saving={saving}
         onClose={() => { setShowItemForm(false); setEditingItem(null); }}
         onSave={handleSaveItem}

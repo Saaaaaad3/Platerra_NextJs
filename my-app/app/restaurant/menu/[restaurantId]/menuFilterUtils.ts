@@ -1,5 +1,12 @@
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 
+/**
+ * Sentinel key for the "uncategorised" bucket (items with a null category_id).
+ * Chosen so it can never collide with a real kebab-case category slug.
+ * Rendered as a headerless card and excluded from the category nav.
+ */
+export const UNCATEGORISED_KEY = "__uncategorised__";
+
 export type FilterKey =
   | "bestseller"
   | "veg"

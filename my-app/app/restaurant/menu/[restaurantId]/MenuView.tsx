@@ -6,7 +6,7 @@ import type { MenuItem } from "../../../../lib/demo-menu-items";
 import MenuItemModal from "./MenuItemModal";
 import CategoryNav from "./CategoryNav";
 import MenuFilters from "./MenuFilters";
-import { itemMatchesFilter, itemMatchesSearch, type FilterKey } from "./menuFilterUtils";
+import { itemMatchesFilter, itemMatchesSearch, UNCATEGORISED_KEY, type FilterKey } from "./menuFilterUtils";
 
 type MenuViewProps = {
   menuByCategory: Record<string, MenuItem[]>;
@@ -149,13 +149,20 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
 
   const allItems = useMemo(() => Object.values(menuByCategory).flat(), [menuByCategory]);
 
-  const navMenuByCategory = useMemo(
-    () =>
-      popularItems.length > 0
-        ? { "popular-this-week": popularItems, ...filteredMenuByCategory }
-        : filteredMenuByCategory,
-    [popularItems, filteredMenuByCategory]
+  // Uncategorised items render as a headerless card and never appear in the nav.
+  const uncategorisedItems = filteredMenuByCategory[UNCATEGORISED_KEY] ?? [];
+
+  const namedCategories = useMemo(
+    () => Object.entries(filteredMenuByCategory).filter(([category]) => category !== UNCATEGORISED_KEY),
+    [filteredMenuByCategory]
   );
+
+  const navMenuByCategory = useMemo(() => {
+    const named = Object.fromEntries(namedCategories);
+    return popularItems.length > 0
+      ? { "popular-this-week": popularItems, ...named }
+      : named;
+  }, [popularItems, namedCategories]);
 
   const hasResults = Object.keys(filteredMenuByCategory).length > 0;
 
@@ -199,7 +206,7 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
             </details>
           )}
 
-          {Object.entries(filteredMenuByCategory).map(([category, items]) => (
+          {namedCategories.map(([category, items]) => (
             <details
               key={category}
               id={`category-${category}`}
@@ -219,6 +226,17 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
               </div>
             </details>
           ))}
+
+          {/* Uncategorised — headerless card, always last, no nav entry */}
+          {uncategorisedItems.length > 0 && (
+            <div className="overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200">
+              <div className="divide-y divide-slate-100 px-3 py-1 sm:px-6 sm:py-2">
+                {uncategorisedItems.map((item) => (
+                  <ItemRow key={item.itemId} item={item} onSelect={setSelectedItem} />
+                ))}
+              </div>
+            </div>
+          )}
         </section>
       )}
 

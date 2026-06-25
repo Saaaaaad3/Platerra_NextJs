@@ -119,7 +119,7 @@ export default function ItemFormPanel({
         name: editingItem.name,
         description: editingItem.description ?? "",
         price: String(editingItem.price),
-        category_id: editingItem.category_id ?? defaultCategoryId,
+        category_id: editingItem.category_id ?? "",
         is_veg: editingItem.is_veg,
         is_jain: editingItem.is_jain,
         is_spicy: editingItem.is_spicy,
@@ -231,6 +231,7 @@ export default function ItemFormPanel({
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>{toDisplay(c.name)}</option>
                       ))}
+                      <option value="">Uncategorised</option>
                     </select>
                   </div>
                 </div>
