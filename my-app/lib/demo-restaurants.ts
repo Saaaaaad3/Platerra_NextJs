@@ -11,6 +11,8 @@ export type RestaurantInfo = {
   description: string;
   location: string;
   logo?: string;
+  coverUrl?: string;
+  showName?: boolean;
   socialHandles?: SocialHandle[];
   headerTagline?: string;
 };

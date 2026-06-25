@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { deleteImage } from "../../../../lib/cloudinary";
 import ImageUploader, { type UploadedImage } from "./ImageUploader";
 
 export type DbItemImage = { id: string; url: string; display_order: number };
@@ -142,6 +143,27 @@ export default function ItemFormPanel({
     }
   }, [editingItem, defaultCategoryId, open]);
 
+  // Latest images, read by the unmount cleanup.
+  const liveImages = useRef<UploadedImage[]>([]);
+  liveImages.current = images;
+
+  // Cancelling or leaving the page with fresh, unsaved uploads deletes them.
+  // Saved images carry a DB `id` (no `isNew`), so they're never touched here.
+  useEffect(() => {
+    return () => {
+      liveImages.current.forEach((img) => {
+        if (img.isNew && img.url) deleteImage(img.url);
+      });
+    };
+  }, []);
+
+  const handleCancel = () => {
+    images.forEach((img) => {
+      if (img.isNew && img.url) deleteImage(img.url);
+    });
+    onClose();
+  };
+
   const set = <K extends keyof FormData>(k: K, v: FormData[K]) =>
     setForm((prev) => ({ ...prev, [k]: v }));
 
@@ -158,7 +180,7 @@ export default function ItemFormPanel({
       {/* Backdrop */}
       <div
         className={`fixed inset-0 z-40 bg-black/30 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
-        onClick={onClose}
+        onClick={handleCancel}
       />
 
       {/* Panel */}
@@ -168,7 +190,7 @@ export default function ItemFormPanel({
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
           <h2 className="font-semibold text-slate-900">{editingItem ? "Edit item" : "Add item"}</h2>
-          <button onClick={onClose} className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
+          <button onClick={handleCancel} className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700">
             <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5">
               <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
             </svg>
@@ -182,15 +204,20 @@ export default function ItemFormPanel({
 
               {/* Photos */}
               <div>
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-400">
+                <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-400">
                   Photos <span className="ml-1 font-normal normal-case text-slate-300">up to 3</span>
+                </p>
+                <p className="mb-2 text-xs text-slate-400">
+                  Shown as a square on the menu, so upload <strong>1:1 (square)</strong> to avoid cropping —
+                  ideally <strong>1000×1000&nbsp;px</strong> · JPG or WebP · under 2&nbsp;MB.
                 </p>
                 <ImageUploader
                   images={images}
                   onChange={setImages}
+                  kind="item"
                   maxImages={3}
-                  minWidth={400}
-                  minHeight={300}
+                  minWidth={600}
+                  minHeight={600}
                 />
               </div>
 
@@ -312,7 +339,7 @@ export default function ItemFormPanel({
           <div className="flex gap-3 border-t border-slate-100 px-6 py-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCancel}
               className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
             >
               Cancel

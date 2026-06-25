@@ -1,6 +1,8 @@
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
+export type UploadKind = "logo" | "cover" | "item";
+
 export function validateImageFile(file: File): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) return "Only JPG, PNG, or WebP images are accepted.";
   if (file.size > MAX_SIZE_BYTES) return "Image must be under 10 MB.";
@@ -33,30 +35,35 @@ export async function checkImageDimensions(
   });
 }
 
-export async function uploadToCloudinary(file: File): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-
-  if (!cloudName || !uploadPreset) {
-    throw new Error(
-      "Cloudinary is not configured. Add NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET to .env.local"
-    );
-  }
-
+/** Uploads through our auth-gated server route (signed, server-side). */
+export async function uploadImage(
+  file: File,
+  kind: UploadKind
+): Promise<{ url: string; publicId: string }> {
   const fd = new FormData();
   fd.append("file", file);
-  fd.append("upload_preset", uploadPreset);
+  fd.append("kind", kind);
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-    { method: "POST", body: fd }
-  );
-
+  const res = await fetch("/api/upload", { method: "POST", body: fd });
   if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { error?: { message?: string } };
-    throw new Error(err.error?.message ?? "Upload failed");
+    const err = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(err.error ?? "Upload failed");
   }
+  return res.json();
+}
 
-  const data = (await res.json()) as { secure_url: string };
-  return data.secure_url;
+/**
+ * Best-effort delete of a Cloudinary asset by its URL. Failures are swallowed —
+ * orphan cleanup should never block the user or fail a save.
+ */
+export async function deleteImage(url: string): Promise<void> {
+  try {
+    await fetch("/api/delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url }),
+    });
+  } catch {
+    /* ignore */
+  }
 }

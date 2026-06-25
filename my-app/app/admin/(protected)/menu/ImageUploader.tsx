@@ -1,13 +1,21 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { uploadToCloudinary, validateImageFile, checkImageDimensions } from "../../../../lib/cloudinary";
+import {
+  uploadImage,
+  deleteImage,
+  validateImageFile,
+  checkImageDimensions,
+  type UploadKind,
+} from "../../../../lib/cloudinary";
 
-export type UploadedImage = { id?: string; url: string };
+// `id` = persisted DB row; `isNew` = uploaded this session and not yet saved.
+export type UploadedImage = { id?: string; url: string; publicId?: string; isNew?: boolean };
 
 interface Props {
   images: UploadedImage[];
   onChange: (images: UploadedImage[]) => void;
+  kind: UploadKind;
   maxImages?: number;
   minWidth?: number;
   minHeight?: number;
@@ -17,6 +25,7 @@ interface Props {
 export default function ImageUploader({
   images,
   onChange,
+  kind,
   maxImages = 3,
   minWidth,
   minHeight,
@@ -39,8 +48,8 @@ export default function ImageUploader({
 
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file);
-      onChange([...images, { url }]);
+      const { url, publicId } = await uploadImage(file, kind);
+      onChange([...images, { url, publicId, isNew: true }]);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -55,6 +64,10 @@ export default function ImageUploader({
   };
 
   const remove = (index: number) => {
+    const img = images[index];
+    // Fresh, unsaved upload → delete it from Cloudinary now so churn never leaves
+    // orphans. Persisted images are cleaned up by the parent's save flow instead.
+    if (img.isNew && img.url) deleteImage(img.url);
     onChange(images.filter((_, i) => i !== index));
   };
 

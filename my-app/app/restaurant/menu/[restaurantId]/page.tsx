@@ -124,36 +124,67 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
     description: restaurant.description ?? "",
     location: restaurant.location ?? "",
     logo: restaurant.logo_url ?? undefined,
+    coverUrl: restaurant.cover_url ?? undefined,
+    showName: restaurant.show_name ?? true,
     socialHandles: restaurant.social_handles ?? [],
     headerTagline: restaurant.header_tagline ?? undefined,
   };
 
   const restaurantName = restaurantInfo.name;
+  const hasCover = !!restaurantInfo.coverUrl;
+  // The logo is the header identity when present, so the name text only shows
+  // when there's no logo — and then only if the owner enables it, OR forced on
+  // when there's also no cover (the header can never be empty).
+  const showName =
+    !restaurantInfo.logo && ((restaurantInfo.showName ?? true) || !hasCover);
 
   return (
     <main className="min-h-screen bg-zinc-50 px-3 py-4 text-slate-900 sm:px-4 sm:py-8">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-8">
-        <header className="rounded-[2rem] bg-white/95 p-4 text-center shadow-sm shadow-slate-200 backdrop-blur-xl sm:p-8">
-          {restaurantInfo.logo ? (
-            <Link href={`/restaurant/${slug}`} className="inline-block transition-opacity hover:opacity-75">
+        <div className="overflow-hidden rounded-[2rem] shadow-sm shadow-slate-200">
+          {restaurantInfo.coverUrl && (
+            <div className="relative aspect-[2/1] w-full">
               <Image
-                src={restaurantInfo.logo}
-                alt={restaurantName}
-                width={240}
-                height={80}
-                className="mx-auto h-14 w-auto object-contain sm:h-20"
+                src={restaurantInfo.coverUrl}
+                alt={`${restaurantName} cover`}
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 1024px, 100vw"
                 priority
               />
-            </Link>
-          ) : (
-            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:mt-4 sm:text-5xl">
-              <Link href={`/restaurant/${slug}`} className="transition-colors hover:text-slate-600">
-                {restaurantName}
-              </Link>
-            </h1>
+            </div>
           )}
 
-          {restaurantInfo.socialHandles && restaurantInfo.socialHandles.length > 0 ? (
+          <header className="bg-white/95 px-4 pb-5 pt-5 text-center backdrop-blur-xl sm:px-8 sm:pb-7 sm:pt-7">
+            {restaurantInfo.logo && (
+              <div className="flex justify-center">
+                <Link
+                  href={`/restaurant/${slug}`}
+                  className={`inline-block rounded-2xl bg-white p-2 shadow-md ring-1 ring-slate-100 transition-opacity hover:opacity-80 ${
+                    hasCover ? "-mt-16 mb-2 sm:-mt-20" : "mb-2"
+                  }`}
+                >
+                  <Image
+                    src={restaurantInfo.logo}
+                    alt={restaurantName}
+                    width={320}
+                    height={160}
+                    className="h-20 w-auto max-w-[60vw] object-contain sm:h-24"
+                    priority
+                  />
+                </Link>
+              </div>
+            )}
+
+            {showName && (
+              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+                <Link href={`/restaurant/${slug}`} className="transition-colors hover:text-slate-600">
+                  {restaurantName}
+                </Link>
+              </h1>
+            )}
+
+            {restaurantInfo.socialHandles && restaurantInfo.socialHandles.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:mt-4">
               {restaurantInfo.socialHandles.map(({ platform, handle }) => {
                 const cfg = SOCIAL_CONFIG[platform as SocialPlatform];
@@ -180,7 +211,8 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
               {restaurantInfo.headerTagline}
             </p>
           ) : null}
-        </header>
+          </header>
+        </div>
 
         {Object.keys(menuByCategory).length > 0 ? (
           <MenuView menuByCategory={menuByCategory} />

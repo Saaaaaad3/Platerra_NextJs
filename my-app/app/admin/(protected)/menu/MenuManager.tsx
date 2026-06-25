@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
+import { deleteImage } from "../../../../lib/cloudinary";
 import ItemFormPanel, { type Category, type DbItem, type DbItemImage } from "./ItemFormPanel";
 import type { UploadedImage } from "./ImageUploader";
 
@@ -118,8 +119,11 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
 
   const handleDeleteItem = async (id: string) => {
     if (!confirm("Delete this item?")) return;
+    const item = items.find((i) => i.id === id);
     const { error } = await supabase.from("menu_items").delete().eq("id", id);
     if (error) { setError(error.message); return; }
+    // Clean up the item's images from Cloudinary too.
+    (item?.item_images ?? []).forEach((img) => deleteImage(img.url));
     setItems((prev) => prev.filter((i) => i.id !== id));
   };
 
@@ -177,14 +181,15 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
     const originalImages = editingItem?.item_images ?? [];
     const imagesWithId = formData.images.filter((img) => img.id);
     const imagesWithIdSet = new Set(imagesWithId.map((img) => img.id!));
-    const removedIds = originalImages
-      .filter((orig) => !imagesWithIdSet.has(orig.id))
-      .map((orig) => orig.id);
+    const removedImages = originalImages.filter((orig) => !imagesWithIdSet.has(orig.id));
+    const removedIds = removedImages.map((orig) => orig.id);
     const newImages = formData.images.filter((img) => !img.id);
 
     if (removedIds.length > 0) {
       const { error } = await supabase.from("item_images").delete().in("id", removedIds);
       if (error) console.error("Error removing images:", error.message);
+      // Remove the orphaned files from Cloudinary too.
+      removedImages.forEach((img) => deleteImage(img.url));
     }
 
     let insertedImages: DbItemImage[] = [];
@@ -459,10 +464,7 @@ export default function MenuManager({ restaurantId, initialCategories, initialIt
 
         <button
           onClick={openAdd}
-          disabled={!selectedCatId}
-          className={`items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:opacity-40 ${
-            mobileView === "categories" ? "hidden lg:flex" : "flex"
-          }`}
+          className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
         >
           <span>+</span> Add item
         </button>
