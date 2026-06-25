@@ -186,6 +186,19 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
             <p className="text-lg font-medium text-slate-700">No menu items found.</p>
           </div>
         )}
+
+        <footer className="mt-2 flex flex-col items-center gap-1.5 pb-4 text-center sm:mt-4">
+          <p className="text-xs text-slate-400">
+            {restaurantInfo.location ? <span>{restaurantInfo.location} · </span> : null}
+            © {new Date().getFullYear()} {restaurantName}
+          </p>
+          <Link
+            href="/admin"
+            className="text-xs text-slate-300 transition-colors hover:text-slate-500"
+          >
+            Owner login
+          </Link>
+        </footer>
       </div>
     </main>
   );
