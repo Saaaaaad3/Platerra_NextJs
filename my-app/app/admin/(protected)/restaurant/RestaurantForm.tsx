@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "../../../../lib/supabase/client";
 import { deleteImage } from "../../../../lib/cloudinary";
+import { parseBranding, resolveTheme, DEFAULT_BRANDING, type Branding } from "../../../../lib/branding";
 import ImageUploader, { type UploadedImage } from "../menu/ImageUploader";
 
 type SocialHandle = { id: string; platform: string; handle: string };
@@ -16,6 +17,7 @@ type Restaurant = {
   cover_url: string | null;
   show_name: boolean | null;
   header_tagline: string | null;
+  branding: unknown;
 };
 
 const PLATFORMS = ["instagram", "facebook", "twitter", "tiktok", "youtube", "website"];
@@ -30,6 +32,11 @@ function buildSnapshot(v: {
   logo: string | null;
   cover: string | null;
   showName: boolean;
+  background: string;
+  surface: string;
+  primary: string;
+  secondary: string;
+  accent: string;
   handles: SocialHandle[];
 }) {
   return JSON.stringify({
@@ -40,6 +47,11 @@ function buildSnapshot(v: {
     logo: v.logo,
     cover: v.cover,
     showName: v.showName,
+    background: v.background,
+    surface: v.surface,
+    primary: v.primary,
+    secondary: v.secondary,
+    accent: v.accent,
     handles: v.handles
       .filter((h) => h.platform && h.handle.trim())
       .map((h) => ({ platform: h.platform, handle: h.handle.trim() })),
@@ -73,6 +85,41 @@ function Toggle({
   );
 }
 
+function ColorField({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <input
+        type="color"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        aria-label={`${label} color picker`}
+        className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
+      />
+      <div className="min-w-0 flex-1">
+        <label className="block text-sm font-medium text-slate-700">{label}</label>
+        <p className="text-xs text-slate-400">{hint}</p>
+      </div>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        spellCheck={false}
+        className="w-24 shrink-0 rounded-xl border border-slate-200 px-3 py-2 text-sm uppercase outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+      />
+    </div>
+  );
+}
+
 export default function RestaurantForm({
   restaurant,
   initialSocialHandles,
@@ -95,6 +142,38 @@ export default function RestaurantForm({
   const [showName, setShowName] = useState(restaurant.show_name ?? true);
   const [handles, setHandles] = useState<SocialHandle[]>(initialSocialHandles);
 
+  // Brand Kit colors. parseBranding normalises a missing/invalid `branding` blob
+  // to the defaults, so the pickers always start from a valid theme.
+  const initialBranding = parseBranding(restaurant.branding);
+  const [background, setBackground] = useState(initialBranding.colors.background);
+  const [surface, setSurface] = useState(initialBranding.colors.surface);
+  const [primary, setPrimary] = useState(initialBranding.colors.primary);
+  const [secondary, setSecondary] = useState(initialBranding.colors.secondary);
+  const [accent, setAccent] = useState(initialBranding.colors.accent);
+
+  // Live preview of the menu, themed by the current (unsaved) colors.
+  const previewTheme = resolveTheme(
+    parseBranding({ version: 1, colors: { background, surface, primary, secondary, accent } })
+  );
+
+  // "Default" means no custom branding — when the colors match the defaults we
+  // persist NULL, clearing the column so the menu falls back to the built-in theme.
+  const d = DEFAULT_BRANDING.colors;
+  const isDefaultColors =
+    background.toLowerCase() === d.background &&
+    surface.toLowerCase() === d.surface &&
+    primary.toLowerCase() === d.primary &&
+    secondary.toLowerCase() === d.secondary &&
+    accent.toLowerCase() === d.accent;
+
+  const resetBranding = () => {
+    setBackground(d.background);
+    setSurface(d.surface);
+    setPrimary(d.primary);
+    setSecondary(d.secondary);
+    setAccent(d.accent);
+  };
+
   const hasLogo = logoImages.length > 0;
   const hasCover = coverImages.length > 0;
   // The name only appears on the menu when there's no logo. It's mandatory (toggle
@@ -115,6 +194,11 @@ export default function RestaurantForm({
       logo: restaurant.logo_url ?? null,
       cover: restaurant.cover_url ?? null,
       showName: !restaurant.logo_url && !restaurant.cover_url ? true : restaurant.show_name ?? true,
+      background: initialBranding.colors.background,
+      surface: initialBranding.colors.surface,
+      primary: initialBranding.colors.primary,
+      secondary: initialBranding.colors.secondary,
+      accent: initialBranding.colors.accent,
       handles: initialSocialHandles,
     })
   );
@@ -127,6 +211,11 @@ export default function RestaurantForm({
     logo: logoImages[0]?.url ?? null,
     cover: coverImages[0]?.url ?? null,
     showName: effectiveShowName,
+    background,
+    surface,
+    primary,
+    secondary,
+    accent,
     handles,
   });
   const isDirty = currentSnapshot !== savedSnapshot;
@@ -165,6 +254,15 @@ export default function RestaurantForm({
     const logoUrl = logoImages[0]?.url ?? null;
     const coverUrl = coverImages[0]?.url ?? null;
 
+    // Normalise before persisting, so a hand-typed invalid hex can never be saved.
+    // When the colors are the defaults, store NULL — "no custom branding" — so the
+    // menu falls back to the built-in theme instead of pinning the default values.
+    const branding: Branding = parseBranding({
+      version: 1,
+      colors: { background, surface, primary, secondary, accent },
+    });
+    const brandingToSave = isDefaultColors ? null : branding;
+
     const { error: restError } = await supabase
       .from("restaurants")
       .update({
@@ -175,6 +273,7 @@ export default function RestaurantForm({
         cover_url: coverUrl,
         show_name: effectiveShowName,
         header_tagline: tagline || null,
+        branding: brandingToSave,
       })
       .eq("id", restaurant.id);
 
@@ -205,7 +304,31 @@ export default function RestaurantForm({
     setLogoImages((imgs) => imgs.map((i) => ({ ...i, isNew: false })));
     setCoverImages((imgs) => imgs.map((i) => ({ ...i, isNew: false })));
 
-    setSavedSnapshot(currentSnapshot);
+    // Reflect the normalised colors back into the form, then baseline off them so
+    // the Save button settles even if an invalid hex was coerced to a default.
+    const { background: nbg, surface: nsf, primary: np, secondary: ns, accent: na } = branding.colors;
+    setBackground(nbg);
+    setSurface(nsf);
+    setPrimary(np);
+    setSecondary(ns);
+    setAccent(na);
+    setSavedSnapshot(
+      buildSnapshot({
+        name,
+        description,
+        location,
+        tagline,
+        logo: logoUrl,
+        cover: coverUrl,
+        showName: effectiveShowName,
+        background: nbg,
+        surface: nsf,
+        primary: np,
+        secondary: ns,
+        accent: na,
+        handles,
+      })
+    );
     setSaving(false);
     setSuccess(true);
     setTimeout(() => setSuccess(false), 3000);
@@ -315,6 +438,98 @@ export default function RestaurantForm({
                 className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Branding */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6">
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-400">Branding</p>
+            <button
+              type="button"
+              onClick={resetBranding}
+              disabled={isDefaultColors}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Reset to default
+            </button>
+          </div>
+          <p className="mb-4 text-xs text-slate-400">
+            Text colors are picked automatically for readability, so any combination stays legible.
+          </p>
+          <div className="flex flex-col gap-4">
+            {/* Live preview — a mini menu using the same tokens the real menu consumes.
+                Kept ABOVE the pickers (and sticky) so the native color dialog, which
+                opens beside the swatch below, never covers it. */}
+            <div
+              style={previewTheme}
+              className="sticky top-2 z-10 overflow-hidden rounded-2xl border border-slate-200 bg-brand-background p-4 text-brand-on-background shadow-sm"
+            >
+              <p className="mb-3 text-center text-sm font-semibold">Your Restaurant</p>
+              <div className="rounded-xl border border-brand-on-surface/10 bg-brand-surface p-3 text-brand-on-surface">
+                <div className="mb-2 flex items-center justify-between border-b border-brand-on-surface/10 pb-2">
+                  <span className="text-sm font-semibold">Starters</span>
+                  <span className="rounded-full bg-brand-secondary px-2 py-0.5 text-[10px] font-medium text-brand-secondary-foreground">
+                    3
+                  </span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">
+                      Seekh Kebab
+                      <span className="ml-1.5 inline-flex rounded-full bg-brand-accent px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wide text-brand-accent-foreground align-middle">
+                        New
+                      </span>
+                    </p>
+                    <p className="truncate text-xs text-brand-on-surface/60">Chargrilled, house spices</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-brand-foreground">
+                    $12
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-xs font-medium uppercase tracking-wide text-slate-300">Base</p>
+            <ColorField
+              label="Background"
+              hint="The menu page behind everything."
+              value={background}
+              onChange={setBackground}
+            />
+            <ColorField
+              label="Surface"
+              hint="Cards, header, and section panels."
+              value={surface}
+              onChange={setSurface}
+            />
+
+            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-slate-300">Accents</p>
+            <ColorField
+              label="Primary"
+              hint="Main brand color — price tags and key accents."
+              value={primary}
+              onChange={setPrimary}
+            />
+            <ColorField
+              label="Secondary"
+              hint="Supporting brand color — category headers."
+              value={secondary}
+              onChange={setSecondary}
+            />
+            <ColorField
+              label="Accent"
+              hint="Highlights such as the “New” badge."
+              value={accent}
+              onChange={setAccent}
+            />
           </div>
         </div>
 

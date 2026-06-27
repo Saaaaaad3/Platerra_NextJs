@@ -34,14 +34,14 @@ export default function MenuFilters({
   }, []);
 
   return (
-    <div className="sticky top-0 z-20 space-y-3 bg-white p-3 shadow-sm shadow-slate-200 sm:space-y-4 sm:p-4">
+    <div className="sticky top-0 z-20 space-y-3 bg-brand-surface p-3 text-brand-on-surface shadow-sm shadow-black/5 sm:space-y-4 sm:p-4">
       <div className="relative">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 20 20"
           fill="currentColor"
           aria-hidden="true"
-          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+          className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-on-surface/40"
         >
           <path
             fillRule="evenodd"
@@ -56,14 +56,14 @@ export default function MenuFilters({
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search dishes, ingredients..."
           aria-label="Search menu"
-          className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-12 pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-400 focus:outline-none sm:py-3"
+          className="w-full rounded-full border border-brand-on-surface/15 bg-brand-on-surface/5 py-2.5 pl-12 pr-12 text-sm text-brand-on-surface placeholder:text-brand-on-surface/40 focus:border-brand-on-surface/40 focus:outline-none sm:py-3"
         />
         {searchText && (
           <button
             type="button"
             onClick={() => onSearchChange("")}
             aria-label="Clear search"
-            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-slate-600"
+            className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-brand-on-surface/40 transition hover:bg-brand-on-surface/10 hover:text-brand-on-surface"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
               <path d="M10 8.586 4.707 3.293 3.293 4.707 8.586 10l-5.293 5.293 1.414 1.414L10 11.414l5.293 5.293 1.414-1.414L11.414 10l5.293-5.293-1.414-1.414L10 8.586Z" />
@@ -88,8 +88,8 @@ export default function MenuFilters({
                 aria-pressed={isActive}
                 className={`flex-shrink-0 whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-semibold transition sm:px-4 sm:py-2 ${
                   isActive
-                    ? "border-slate-900 bg-slate-900 text-white"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    ? "border-brand bg-brand text-brand-foreground"
+                    : "border-brand-on-surface/15 bg-brand-surface text-brand-on-surface/70 hover:border-brand-on-surface/30"
                 }`}
               >
                 {filter.label}
@@ -101,13 +101,13 @@ export default function MenuFilters({
         {canScrollLeft && (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-white to-transparent sm:w-10"
+            className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-brand-surface to-transparent sm:w-10"
           />
         )}
         {canScrollRight && (
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white to-transparent sm:w-10"
+            className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-brand-surface to-transparent sm:w-10"
           />
         )}
       </div>

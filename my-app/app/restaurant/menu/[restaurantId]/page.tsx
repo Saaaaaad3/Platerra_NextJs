@@ -6,6 +6,7 @@ import type { MenuItem } from "../../../../lib/demo-menu-items";
 import type { RestaurantInfo, SocialPlatform } from "../../../../lib/demo-restaurants";
 import { UNCATEGORISED_KEY } from "./menuFilterUtils";
 import MenuView from "./MenuView";
+import { parseBranding, resolveTheme } from "../../../../lib/branding";
 
 type PageProps = {
   params: Promise<{ restaurantId: string }>;
@@ -138,8 +139,16 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
   const showName =
     !restaurantInfo.logo && ((restaurantInfo.showName ?? true) || !hasCover);
 
+  // Resolve the Brand Kit server-side and inject it as CSS vars on the root, so
+  // the theme is present in the first paint (no flash) and cascades to the
+  // client menu components below.
+  const themeStyle = resolveTheme(parseBranding(restaurant.branding));
+
   return (
-    <main className="min-h-screen bg-zinc-50 px-3 py-4 text-slate-900 sm:px-4 sm:py-8">
+    <main
+      style={themeStyle}
+      className="min-h-screen bg-brand-background px-3 py-4 text-brand-on-background sm:px-4 sm:py-8"
+    >
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-8">
         <div className="overflow-hidden rounded-[2rem] shadow-sm shadow-slate-200">
           {restaurantInfo.coverUrl && (
@@ -155,7 +164,7 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
             </div>
           )}
 
-          <header className="bg-white/95 px-4 pb-5 pt-5 text-center backdrop-blur-xl sm:px-8 sm:pb-7 sm:pt-7">
+          <header className="bg-brand-surface px-4 pb-5 pt-5 text-center text-brand-on-surface sm:px-8 sm:pb-7 sm:pt-7">
             {restaurantInfo.logo && (
               <div className="flex justify-center">
                 <Link
@@ -177,8 +186,8 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
             )}
 
             {showName && (
-              <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
-                <Link href={`/restaurant/${slug}`} className="transition-colors hover:text-slate-600">
+              <h1 className="text-2xl font-semibold tracking-tight text-brand-on-surface sm:text-5xl">
+                <Link href={`/restaurant/${slug}`} className="transition-opacity hover:opacity-70">
                   {restaurantName}
                 </Link>
               </h1>
@@ -196,7 +205,7 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`${cfg.label}: ${handle}`}
-                    className="flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-slate-700"
+                    className="flex items-center gap-1.5 text-sm text-brand-on-surface/50 transition-colors hover:text-brand-on-surface"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 flex-shrink-0" aria-hidden="true">
                       <path d={cfg.path} />
@@ -207,7 +216,7 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
               })}
             </div>
           ) : restaurantInfo.headerTagline ? (
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-lg sm:leading-7">
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-brand-on-surface/70 sm:mt-4 sm:text-lg sm:leading-7">
               {restaurantInfo.headerTagline}
             </p>
           ) : null}
@@ -217,19 +226,19 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
         {Object.keys(menuByCategory).length > 0 ? (
           <MenuView menuByCategory={menuByCategory} />
         ) : (
-          <div className="rounded-[2rem] bg-white p-10 text-center shadow-sm shadow-slate-200">
-            <p className="text-lg font-medium text-slate-700">No menu items found.</p>
+          <div className="rounded-[2rem] bg-brand-surface p-10 text-center text-brand-on-surface shadow-sm shadow-black/5">
+            <p className="text-lg font-medium">No menu items found.</p>
           </div>
         )}
 
         <footer className="mt-2 flex flex-col items-center gap-1.5 pb-4 text-center sm:mt-4">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-brand-on-background/50">
             {restaurantInfo.location ? <span>{restaurantInfo.location} · </span> : null}
             © {new Date().getFullYear()} {restaurantName}
           </p>
           <Link
             href="/admin"
-            className="text-xs text-slate-300 transition-colors hover:text-slate-500"
+            className="text-xs text-brand-on-background/40 transition-colors hover:text-brand-on-background/70"
           >
             Owner login
           </Link>

@@ -33,7 +33,7 @@ export default function CategoryNav({ menuByCategory }: CategoryNavProps) {
           <div
             role="menu"
             aria-label="Jump to category"
-            className="absolute bottom-16 right-0 mb-2 max-h-[60vh] w-64 overflow-y-auto rounded-2xl bg-white p-2 shadow-2xl shadow-slate-300/60 ring-1 ring-slate-100 animate-fade-in"
+            className="absolute bottom-16 right-0 mb-2 max-h-[60vh] w-64 overflow-y-auto rounded-2xl bg-brand-surface p-2 text-brand-on-surface shadow-2xl shadow-black/20 ring-1 ring-brand-on-surface/10 animate-fade-in"
           >
             {categories.map(([category, items]) => (
               <button
@@ -41,10 +41,10 @@ export default function CategoryNav({ menuByCategory }: CategoryNavProps) {
                 type="button"
                 role="menuitem"
                 onClick={() => scrollToCategory(category)}
-                className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                className="flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium text-brand-on-surface transition hover:bg-brand-on-surface/10"
               >
                 <span className="capitalize">{category.replace(/-/g, " ")}</span>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-brand-secondary px-2.5 py-0.5 text-xs font-semibold text-brand-secondary-foreground">
                   {items.length}
                 </span>
               </button>
@@ -57,7 +57,7 @@ export default function CategoryNav({ menuByCategory }: CategoryNavProps) {
           onClick={() => setIsOpen((open) => !open)}
           aria-label={isOpen ? "Close category menu" : "Open category menu"}
           aria-expanded={isOpen}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg shadow-slate-400/50 transition hover:bg-slate-800 active:scale-95"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-lg shadow-black/20 transition hover:opacity-90 active:scale-95"
         >
           {isOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6">

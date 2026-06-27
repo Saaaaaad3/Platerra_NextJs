@@ -41,9 +41,9 @@ function ItemRow({
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className="flex w-full items-center gap-4 rounded-2xl py-4 text-left transition active:bg-slate-50 sm:gap-5"
+      className="flex w-full items-center gap-4 rounded-2xl py-4 text-left transition active:bg-brand-on-surface/5 sm:gap-5"
     >
-      <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100 sm:h-36 sm:w-36">
+      <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-brand-on-surface/10 sm:h-36 sm:w-36">
         <Image
           src={item.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
           alt={`${item.itemName} thumbnail`}
@@ -52,7 +52,7 @@ function ItemRow({
           sizes="(min-width: 640px) 9rem, 8rem"
         />
         {item.itemIsNew && (
-          <span className="absolute left-2 top-2 rounded-full bg-violet-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
+          <span className="absolute left-2 top-2 rounded-full bg-brand-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-brand-accent-foreground shadow-sm">
             New
           </span>
         )}
@@ -60,7 +60,7 @@ function ItemRow({
 
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="text-lg font-semibold leading-snug text-slate-900 sm:text-2xl">
+          <h2 className="text-lg font-semibold leading-snug text-brand-on-surface sm:text-2xl">
             <span
               className={`mr-1.5 inline-flex h-3.5 w-3.5 items-center justify-center rounded-[3px] border align-middle ${
                 item.itemIsVeg ? "border-emerald-600" : "border-rose-700"
@@ -91,11 +91,11 @@ function ItemRow({
               </svg>
             )}
           </h2>
-          <span className="hidden flex-shrink-0 rounded-full bg-slate-900 px-4 py-1.5 text-base font-semibold text-white sm:inline-flex">
+          <span className="hidden flex-shrink-0 rounded-full bg-brand px-4 py-1.5 text-base font-semibold text-brand-foreground sm:inline-flex">
             ${item.itemPrice}
           </span>
         </div>
-        <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-slate-600 sm:mt-2 sm:leading-6">
+        <p className="mt-1.5 line-clamp-2 text-sm leading-5 text-brand-on-surface/70 sm:mt-2 sm:leading-6">
           {item.itemDescription}
         </p>
         <div className="mt-2 flex items-center justify-between gap-2">
@@ -106,7 +106,7 @@ function ItemRow({
               </span>
             )}
           </div>
-          <span className="flex-shrink-0 rounded-full bg-slate-900 px-3 py-1 text-sm font-semibold text-white sm:hidden">
+          <span className="flex-shrink-0 rounded-full bg-brand px-3 py-1 text-sm font-semibold text-brand-foreground sm:hidden">
             ${item.itemPrice}
           </span>
         </div>
@@ -176,7 +176,7 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
       />
 
       {!hasResults && (
-        <div className="mt-4 rounded-[2rem] bg-white px-6 py-12 text-center text-slate-500 shadow-sm shadow-slate-200">
+        <div className="mt-4 rounded-[2rem] bg-brand-surface px-6 py-12 text-center text-brand-on-surface/70 shadow-sm shadow-black/5">
           No dishes match your search or filters.
         </div>
       )}
@@ -187,18 +187,18 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
             <details
               id="category-popular-this-week"
               open
-              className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200"
+              className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-brand-surface text-brand-on-surface shadow-sm shadow-black/5"
             >
-              <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 text-left text-lg font-semibold text-slate-900 transition-colors hover:text-slate-700 sm:px-6 sm:py-5 sm:text-xl">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-brand-on-surface/10 px-4 py-3 text-left text-lg font-semibold text-brand-on-surface transition-opacity hover:opacity-70 sm:px-6 sm:py-5 sm:text-xl">
                 <span className="flex items-center gap-2">
                   <TrendingIcon className="h-5 w-5 flex-shrink-0 text-orange-400 sm:h-6 sm:w-6" />
                   Popular this week
                 </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+                <span className="rounded-full bg-brand-secondary px-3 py-1 text-sm font-medium text-brand-secondary-foreground">
                   {popularItems.length}
                 </span>
               </summary>
-              <div className="divide-y divide-slate-100 px-3 py-1 sm:px-6 sm:py-2">
+              <div className="divide-y divide-brand-on-surface/10 px-3 py-1 sm:px-6 sm:py-2">
                 {popularItems.map((item) => (
                   <ItemRow key={item.itemId} item={item} onSelect={setSelectedItem} />
                 ))}
@@ -211,15 +211,15 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
               key={category}
               id={`category-${category}`}
               open
-              className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200"
+              className="scroll-mt-4 overflow-hidden rounded-[2rem] bg-brand-surface text-brand-on-surface shadow-sm shadow-black/5"
             >
-              <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-slate-200 px-4 py-3 text-left text-lg font-semibold text-slate-900 transition-colors hover:text-slate-700 sm:px-6 sm:py-5 sm:text-xl">
+              <summary className="flex cursor-pointer items-center justify-between gap-4 border-b border-brand-on-surface/10 px-4 py-3 text-left text-lg font-semibold text-brand-on-surface transition-opacity hover:opacity-70 sm:px-6 sm:py-5 sm:text-xl">
                 <span className="capitalize">{category.replace(/-/g, " ")}</span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-600">
+                <span className="rounded-full bg-brand-secondary px-3 py-1 text-sm font-medium text-brand-secondary-foreground">
                   {items.length}
                 </span>
               </summary>
-              <div className="divide-y divide-slate-100 px-3 py-1 sm:px-6 sm:py-2">
+              <div className="divide-y divide-brand-on-surface/10 px-3 py-1 sm:px-6 sm:py-2">
                 {items.map((item) => (
                   <ItemRow key={item.itemId} item={item} onSelect={setSelectedItem} />
                 ))}
@@ -229,8 +229,8 @@ export default function MenuView({ menuByCategory }: MenuViewProps) {
 
           {/* Uncategorised — headerless card, always last, no nav entry */}
           {uncategorisedItems.length > 0 && (
-            <div className="overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-slate-200">
-              <div className="divide-y divide-slate-100 px-3 py-1 sm:px-6 sm:py-2">
+            <div className="overflow-hidden rounded-[2rem] bg-brand-surface text-brand-on-surface shadow-sm shadow-black/5">
+              <div className="divide-y divide-brand-on-surface/10 px-3 py-1 sm:px-6 sm:py-2">
                 {uncategorisedItems.map((item) => (
                   <ItemRow key={item.itemId} item={item} onSelect={setSelectedItem} />
                 ))}

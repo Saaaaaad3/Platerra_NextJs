@@ -3,6 +3,21 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Brand Kit defaults (the fallback layer). Per-restaurant values are injected
+     as inline CSS vars on the page root by resolveTheme(); these defaults make
+     unthemed restaurants render the original design. The --brand-on-* tokens are
+     the readable text color for each surface. See Extra Files/Branding.md. */
+  --brand-background: #fafafa;
+  --brand-on-background: #171717;
+  --brand-surface: #ffffff;
+  --brand-on-surface: #171717;
+  --brand-primary: #0f172a;
+  --brand-on-primary: #ffffff;
+  --brand-secondary: #475569;
+  --brand-on-secondary: #ffffff;
+  --brand-accent: #8b5cf6;
+  --brand-on-accent: #ffffff;
 }
 
 @theme inline {
@@ -10,6 +25,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Components consume these semantic tokens (never raw colors), so every future
+     theming feature is just a different way of filling the vars above. */
+  --color-brand-background: var(--brand-background);
+  --color-brand-on-background: var(--brand-on-background);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-on-surface: var(--brand-on-surface);
+  --color-brand: var(--brand-primary);
+  --color-brand-foreground: var(--brand-on-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-foreground: var(--brand-on-secondary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-on-accent);
 }
 
 body {
