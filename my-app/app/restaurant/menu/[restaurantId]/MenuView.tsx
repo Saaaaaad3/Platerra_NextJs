@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import SmartImage from "./SmartImage";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 import MenuItemModal from "./MenuItemModal";
 import CategoryNav from "./CategoryNav";
@@ -44,7 +44,7 @@ function ItemRow({
       className="flex w-full items-center gap-4 rounded-2xl py-4 text-left transition active:bg-brand-on-surface/5 sm:gap-5"
     >
       <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-brand-on-surface/10 sm:h-36 sm:w-36">
-        <Image
+        <SmartImage
           src={item.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
           alt={`${item.itemName} thumbnail`}
           fill

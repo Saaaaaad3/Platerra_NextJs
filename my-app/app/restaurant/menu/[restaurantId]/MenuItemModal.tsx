@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import SmartImage from "./SmartImage";
 import type { MenuItem } from "../../../../lib/demo-menu-items";
 import { useSwipeNavigation } from "./useSwipeNavigation";
 import GalleryControls from "./GalleryControls";
@@ -227,7 +227,8 @@ export default function MenuItemModal({ item, allItems, onClose, onSelectItem }:
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
-            <Image
+            <SmartImage
+              key={images[activeImage]}
               src={images[activeImage]}
               alt={`${item.itemName} photo ${activeImage + 1}`}
               fill
@@ -350,7 +351,7 @@ export default function MenuItemModal({ item, allItems, onClose, onSelectItem }:
                         className="flex flex-shrink-0 flex-col gap-2 text-left active:opacity-70"
                       >
                         <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-brand-on-surface/10">
-                          <Image
+                          <SmartImage
                             src={related.itemImages?.[0] ?? "/img/DummyDishImage.jpg"}
                             alt={related.itemName}
                             fill

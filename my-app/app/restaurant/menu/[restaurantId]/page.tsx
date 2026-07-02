@@ -6,6 +6,7 @@ import type { MenuItem } from "../../../../lib/demo-menu-items";
 import type { RestaurantInfo, SocialPlatform } from "../../../../lib/demo-restaurants";
 import { UNCATEGORISED_KEY } from "./menuFilterUtils";
 import MenuView from "./MenuView";
+import SmartImage from "./SmartImage";
 import { parseBranding, resolveTheme } from "../../../../lib/branding";
 
 type PageProps = {
@@ -153,7 +154,7 @@ export default async function RestaurantMenuPage({ params }: PageProps) {
         <div className="overflow-hidden rounded-[2rem] shadow-sm shadow-slate-200">
           {restaurantInfo.coverUrl && (
             <div className="relative aspect-[2/1] w-full">
-              <Image
+              <SmartImage
                 src={restaurantInfo.coverUrl}
                 alt={`${restaurantName} cover`}
                 fill
